@@ -31,11 +31,6 @@ let UserSchema = new mongoose.Schema(
         required: true,
         trim: true,
       },
-
-      passwordHash: {
-        type: String,
-        trim: true,
-      }
     },
 
     {

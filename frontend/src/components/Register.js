@@ -16,6 +16,11 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIos from '@material-ui/icons/ArrowBackIos';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel'
 
 function Copyright() {
   return (
@@ -59,6 +64,29 @@ const styles = theme => ({
 
 class Register extends Component {
 
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            email: '',
+            password: '',
+            firstName: '',
+            lastName: '',
+            type: '',
+        }
+
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(event) {
+        // console.log(this.state)
+        const { name, value } = event.target;
+        this.setState({
+            [name]: value,
+        })
+        console.log(this.state)
+    }
+
   render() {
       const { classes } = this.props;
       return (
@@ -85,6 +113,7 @@ class Register extends Component {
                   </Avatar>
                   <Typography component="h1" variant="h5">
                     Register
+                    <br/>
                   </Typography>
                   <form className={classes.form} noValidate>
                     <Grid container spacing={2}>
@@ -98,6 +127,8 @@ class Register extends Component {
                           id="firstName"
                           label="First Name"
                           autoFocus
+                          onChange={this.handleChange}
+                          value={this.state.firstName}
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
@@ -109,6 +140,8 @@ class Register extends Component {
                           label="Last Name"
                           name="lastName"
                           autoComplete="lname"
+                          onChange={this.handleChange}
+                          value={this.state.lastName}
                         />
                       </Grid>
                       <Grid item xs={12}>
@@ -120,6 +153,8 @@ class Register extends Component {
                           label="Email Address"
                           name="email"
                           autoComplete="email"
+                          onChange={this.handleChange}
+                          value={this.state.email}
                         />
                       </Grid>
                       <Grid item xs={12}>
@@ -132,7 +167,18 @@ class Register extends Component {
                           type="password"
                           id="password"
                           autoComplete="current-password"
+                          onChange={this.handleChange}
+                          value={this.state.password}
                         />
+                      </Grid>
+                      <Grid item xs={12}>
+                          <FormControl component="fieldset" className={classes.formControl}>
+                         <FormLabel component="legend">Register as a:</FormLabel>
+                         <RadioGroup aria-label="gender" name="type" value={this.state.type} onChange={this.handleChange}>
+                           <FormControlLabel value="customer" control={<Radio />} label="Customer" />
+                           <FormControlLabel value="vendor" control={<Radio />} label="Vendor" />
+                         </RadioGroup>
+                       </FormControl>
                       </Grid>
                     </Grid>
                     <Button
@@ -146,7 +192,7 @@ class Register extends Component {
                     </Button>
                     <Grid container justify="flex-end">
                       <Grid item>
-                        <Link href="http://localhost:3000/LogIn" variant="body2">
+                        <Link href="/LogIn" variant="body2">
                           Already have an account? Log in
                         </Link>
                       </Grid>

@@ -16,6 +16,11 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIos from '@material-ui/icons/ArrowBackIos';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel'
 
 function Copyright() {
   return (
@@ -58,6 +63,26 @@ const styles = theme => ({
 
 class LogIn extends Component {
 
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            email: '',
+            password: '',
+            type: '',
+        }
+
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(event) {
+        // console.log(this.state)
+        const { name, value } = event.target;
+        this.setState({
+            [name]: value,
+        });
+    }
+
     render() {
         const { classes } = this.props;
 
@@ -72,7 +97,7 @@ class LogIn extends Component {
                           <Typography variant="h6" className={classes.title} style={{flex: 1}}>
                             Back
                           </Typography>
-                            <Button color="inherit" className='float-right'onClick={event =>  window.location.href='/Register'}>Register</Button>
+                          <Button color="inherit" className='float-right' onClick={event =>  window.location.href='/Register'}>Register</Button>
                         </Toolbar>
                     </AppBar>
                 </Container>
@@ -97,6 +122,8 @@ class LogIn extends Component {
                         name="email"
                         autoComplete="email"
                         autoFocus
+                        onChange={this.handleChange}
+                        value={this.state.email}
                       />
                       <TextField
                         variant="outlined"
@@ -108,11 +135,18 @@ class LogIn extends Component {
                         type="password"
                         id="password"
                         autoComplete="current-password"
+                        onChange={this.handleChange}
+                        value={this.state.password}
                       />
-                      <FormControlLabel
-                        control={<Checkbox value="remember" color="primary" />}
-                        label="Remember me"
-                      />
+                      <Grid item xs={12}>
+                          <FormControl component="fieldset" className={classes.formControl}>
+                         <FormLabel component="legend">Login as a:</FormLabel>
+                         <RadioGroup aria-label="gender" name="type" value={this.state.type} onChange={this.handleChange}>
+                           <FormControlLabel value="customer" control={<Radio />} label="Customer" />
+                           <FormControlLabel value="vendor" control={<Radio />} label="Vendor" />
+                         </RadioGroup>
+                       </FormControl>
+                      </Grid>
                       <Button
                         type="submit"
                         fullWidth
@@ -122,14 +156,9 @@ class LogIn extends Component {
                       >
                         Log In
                       </Button>
-                      <Grid container>
-                        <Grid item xs>
-                          <Link href="#" variant="body2">
-                            Forgot password?
-                          </Link>
-                        </Grid>
+                      <Grid container justify="flex-end">
                         <Grid item>
-                          <Link href="http://localhost:3000/register" variant="body2">
+                          <Link href="/Register" variant="body2">
                             {"Don't have an account? Register"}
                           </Link>
                         </Grid>
