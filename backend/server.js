@@ -15,13 +15,14 @@ app.use(bodyParser.json());
 // Connection to mongodb
 mongoose.connect('mongodb://127.0.0.1:27017/users', { useNewUrlParser: true });
 const connection = mongoose.connection;
-connection.once('open', function() {
+connection.once('open', () => {
     console.log("MongoDB database connection established succesfully.");
 })
 
 // API endpoints
 
 // Getting all the users
+const userRoutes = require("./routes/user")
 userRoutes.route('/').get(function(req, res) {
     User.find(function(err, users) {
         if (err) {
@@ -54,6 +55,6 @@ userRoutes.route('/:id').get(function(req, res) {
 
 app.use('/', userRoutes);
 
-app.listen(PORT, function() {
+app.listen(PORT, () => {
     console.log("Server is running on port: " + PORT);
 });
