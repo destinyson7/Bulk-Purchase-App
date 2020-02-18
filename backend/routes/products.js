@@ -19,11 +19,7 @@ router.route("/").get((req, res) => {
 // Adding a new user
 router.post(
   "/add",
-  [
-    check("name").isAlphanumeric(),
-    check("price").isNumeric(),
-    check("quantity").isNumeric()
-  ],
+  [check("price").isNumeric(), check("quantity").isNumeric()],
   (req, res) => {
     // console.log("here");
     // console.log(req.body);
@@ -83,9 +79,54 @@ router.post("/seller", (req, res) => {
     });
 });
 
-router.post("/cancel", (req, res) => {
+router.post("/delete", (req, res) => {
   let id = req.body.id;
   Product.deleteOne({ _id: id })
+    .exec()
+    .then(res => {
+      res.status(200).send("deleted");
+    })
+    .catch(err => {
+      res.status(400).json(err);
+    });
+});
+
+router.post("/cancel", (req, res) => {
+  let id = req.body.id;
+  Product.findByIdAndUpdate({ _id: id }, { isCancelled: true })
+    .exec()
+    .then(res => {
+      res.status(200).send("cancelled");
+    })
+    .catch(err => {
+      res.status(400).json(err);
+    });
+});
+
+router.post("/ready", (req, res) => {
+  let sellerID = req.body.sellerID;
+
+  console.log(sellerID);
+
+  Product.find({
+    sellerID: sellerID,
+    isCancelled: false,
+    quantityRemaining: 0,
+    isReady: true,
+    hasDispatched: false
+  })
+    .then(products => {
+      res.status(200).json(products);
+    })
+    .catch(err => {
+      res.status(200).send(err);
+      console.log(err);
+    });
+});
+
+router.post("/dispatch", (req, res) => {
+  let id = req.body.id;
+  Product.findByIdAndUpdate({ _id: id }, { hasDispatched: true })
     .exec()
     .then(res => {
       res.status(200).send("cancelled");
