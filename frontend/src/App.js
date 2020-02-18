@@ -20,6 +20,8 @@ import "./App.css";
 import Register from "./components/Register";
 import LogIn from "./components/LogIn";
 import NavBar from "./components/Navbar";
+import Vendor from "./components/Vendor";
+import VendorAdd from "./components/VendorAdd";
 
 function App(props) {
   return (
@@ -28,6 +30,8 @@ function App(props) {
         <Route exact path="/" component={LogIn} />
         <Route path="/register" component={Register} />
         <Route path="/login" component={LogIn} />
+        <Route exact path="/vendor" component={Vendor} />
+        <Route path="/vendor/add" component={VendorAdd} />
       </div>
     </Router>
   );
