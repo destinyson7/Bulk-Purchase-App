@@ -105,13 +105,18 @@ class Register extends Component {
     ) {
       // console.log("***");
       axios
-        .post("http://localhost:4000/user/add", user)
+        .post("http://localhost:4000/users/register", user)
         .then(res => {
           // console.log("**");
           // console.log(res.data.User);
           this.setState({
             error: res.data.User,
-            color: "green"
+            color: "green",
+            email: "",
+            password: "",
+            firstName: "",
+            lastName: "",
+            type: ""
           });
         })
         .catch(err => {
@@ -119,18 +124,15 @@ class Register extends Component {
           // console.log("here");
           // console.log(err.data);
           this.setState({
-            error: "Cannot Register User",
-            color: "red"
+            error: "Error: Cannot Register User",
+            color: "red",
+            email: this.state.email,
+            password: "",
+            firstName: this.state.firstName,
+            lastName: this.state.lastName,
+            type: this.state.type
           });
         });
-
-      this.setState({
-        email: "",
-        password: "",
-        firstName: "",
-        lastName: "",
-        type: ""
-      });
     } else {
       // console.log("****");
 
