@@ -63,8 +63,8 @@ const StyledTableRow = withStyles(theme => ({
   }
 }))(TableRow);
 
-function createData(name, price, quantity, quantityRemaining) {
-  return { name, price, quantity, quantityRemaining };
+function createData(id, name, price, quantity, quantityRemaining) {
+  return { id, name, price, quantity, quantityRemaining };
 }
 
 const styles = theme => ({
@@ -174,7 +174,21 @@ class VendorView extends Component {
     }
   }
 
-  handleChange(event) {}
+  handleChange(event, id) {
+    console.log(id);
+    axios
+      .post("http://localhost:4000/products/cancel", { id: id })
+      .then(res => {
+        console.log("cancelled");
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
+    this.setState({
+      products: this.state.products.filter(product => product._id != id)
+    });
+  }
 
   render() {
     const { classes } = this.props;
@@ -190,6 +204,7 @@ class VendorView extends Component {
     for (var i = 0; i < this.state.products.length; i++) {
       rows.push(
         createData(
+          this.state.products[i]._id,
           this.state.products[i].name,
           this.state.products[i].price,
           this.state.products[i].quantity,
@@ -290,7 +305,7 @@ class VendorView extends Component {
                       variant="contained"
                       color="secondary"
                       name="isCancelled"
-                      onClick={this.handleChange}
+                      onClick={e => this.handleChange(e, row.id)}
                     >
                       Cancel
                     </Button>

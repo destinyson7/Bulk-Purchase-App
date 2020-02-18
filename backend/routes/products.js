@@ -83,4 +83,16 @@ router.post("/seller", (req, res) => {
     });
 });
 
+router.post("/cancel", (req, res) => {
+  let id = req.body.id;
+  Product.deleteOne({ _id: id })
+    .exec()
+    .then(res => {
+      res.status(200).send("cancelled");
+    })
+    .catch(err => {
+      res.status(400).json(err);
+    });
+});
+
 module.exports = router;
