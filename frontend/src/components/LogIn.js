@@ -21,6 +21,7 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
+import axios from "axios";
 
 function Copyright() {
   return (
@@ -67,10 +68,13 @@ class LogIn extends Component {
     this.state = {
       email: "",
       password: "",
-      type: ""
+      type: "",
+      error: "",
+      color: ""
     };
 
     this.handleChange = this.handleChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   handleChange(event) {
@@ -83,14 +87,78 @@ class LogIn extends Component {
 
   onSubmit(event) {
     event.preventDefault();
+
+    const user = this.state;
+    console.log(user);
+
+    if (
+      user["email"] !== "" &&
+      user["password"] !== "" &&
+      user["type"] !== ""
+    ) {
+      // console.log("***");
+      axios
+        .post("http://localhost:4000/users/login", user)
+        .then(res => {
+          console.log("**");
+          console.log(res.data);
+
+          if (res.data.data === "Invalid Credentials") {
+            console.log("invalid");
+            this.setState({
+              error: "Invalid Credentials",
+              color: "red",
+              email: this.state.email,
+              password: "",
+              type: this.state.type
+            });
+          } else {
+            console.log("valid");
+            this.setState({
+              error: "Logged in successfully!",
+              color: "green",
+              email: "",
+              password: "",
+              type: ""
+            });
+          }
+        })
+        .catch(err => {
+          // console.log(user);
+          // console.log("here");
+          console.log(err);
+          this.setState({
+            error: "Cannot login user",
+            color: "red",
+            email: "",
+            password: "",
+            type: ""
+          });
+        });
+    } else {
+      // console.log("****");
+
+      this.setState({
+        email: this.state.email,
+        password: "",
+        type: this.state.type,
+        error: "All fields are Mandatory!",
+        color: "red"
+      });
+    }
   }
 
   render() {
     const { classes } = this.props;
+    const styles = {
+      errorColor: {
+        color: this.state.color
+      }
+    };
 
     return (
       <Container>
-        <Container component="header" maxWidth="100%">
+        <Container component="header" maxWidth="xl">
           <AppBar position="static">
             <Toolbar>
               <IconButton
@@ -186,6 +254,7 @@ class LogIn extends Component {
                 variant="contained"
                 color="primary"
                 className={classes.submit}
+                onClick={this.onSubmit}
               >
                 Log In
               </Button>
@@ -194,6 +263,11 @@ class LogIn extends Component {
                   <Link href="/Register" variant="body2">
                     {"Don't have an account? Register"}
                   </Link>
+                </Grid>
+              </Grid>
+              <Grid container>
+                <Grid item>
+                  <p style={styles.errorColor}>{this.state.error}</p>
                 </Grid>
               </Grid>
             </form>

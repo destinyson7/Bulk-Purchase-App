@@ -23,7 +23,8 @@ router.post(
   ],
   (req, res) => {
     let user = new User(req.body);
-    // console.log(user);
+
+    console.log(user);
     // console.log("heyya");
 
     const errors = validationResult(req);
@@ -51,11 +52,23 @@ router.route("/:id").get((req, res) => {
   });
 });
 
-// router.route('/login').get((req, res) => {
-//     let email = req.params.email;
-//     let password = req.params.password;
-//
-//
-// });
+router.post("/login", (req, res) => {
+  let email = req.body.email;
+  let password = req.body.password;
+  let type = req.body.type;
+
+  console.log(email, password, type);
+
+  User.findOne({ email: email }, (err, user) => {
+    if (err) {
+      res.json(err);
+    }
+    if (user && user.password === password && user.type === type) {
+      res.json(user);
+    } else {
+      res.json({ data: "Invalid Credentials" });
+    }
+  });
+});
 
 module.exports = router;

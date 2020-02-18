@@ -120,9 +120,9 @@ class Register extends Component {
           });
         })
         .catch(err => {
-          // console.log(user);
-          // console.log("here");
-          // console.log(err.data);
+          console.log(user);
+          console.log("here");
+          console.log(err);
           this.setState({
             error: "Error: Cannot Register User",
             color: "red",

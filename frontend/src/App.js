@@ -25,7 +25,7 @@ function App(props) {
   return (
     <Router>
       <div className="container">
-        <Route exact path="/" component={Register} />
+        <Route exact path="/" component={LogIn} />
         <Route path="/register" component={Register} />
         <Route path="/login" component={LogIn} />
       </div>
