@@ -117,7 +117,7 @@ const styles = theme => ({
   }
 });
 
-class VendorReady extends Component {
+class VendorDispatched extends Component {
   constructor(props) {
     super(props);
 
@@ -150,7 +150,7 @@ class VendorReady extends Component {
           console.log("mine", this.state);
 
           axios
-            .post("http://localhost:4000/products/ready", {
+            .post("http://localhost:4000/products/dispatched", {
               sellerID: this.state.userData.id
             })
             .then(resp => {
@@ -172,22 +172,6 @@ class VendorReady extends Component {
         });
       console.log("final");
     }
-  }
-
-  handleChange(event, id) {
-    console.log(id);
-    axios
-      .post("http://localhost:4000/products/dispatch", { id: id })
-      .then(res => {
-        console.log("dispatched");
-      })
-      .catch(err => {
-        console.log(err);
-      });
-
-    this.setState({
-      products: this.state.products.filter(product => product._id != id)
-    });
   }
 
   render() {
@@ -248,15 +232,15 @@ class VendorReady extends Component {
               >
                 View
               </Link>
-              <Link variant="button" href="#" className={classes.link}>
-                Ready to Dispatch
-              </Link>
               <Link
                 variant="button"
+                href="/vendor/ready"
                 color="textPrimary"
-                href="/vendor/dispatched"
                 className={classes.link}
               >
+                Ready to Dispatch
+              </Link>
+              <Link variant="button" href="#" className={classes.link}>
                 Dispatched
               </Link>
             </nav>
@@ -280,8 +264,6 @@ class VendorReady extends Component {
                 <StyledTableCell>Product Name</StyledTableCell>
                 <StyledTableCell align="right">Price</StyledTableCell>
                 <StyledTableCell align="right">Quantity</StyledTableCell>
-
-                <StyledTableCell align="right">Dispatch ?</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -294,16 +276,6 @@ class VendorReady extends Component {
                   <StyledTableCell align="right">
                     {row.quantity}
                   </StyledTableCell>
-                  <StyledTableCell align="right">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      name="isReady"
-                      onClick={e => this.handleChange(e, row.id)}
-                    >
-                      Dispatch
-                    </Button>
-                  </StyledTableCell>
                 </StyledTableRow>
               ))}
             </TableBody>
@@ -314,4 +286,4 @@ class VendorReady extends Component {
   }
 }
 
-export default withRouter(withStyles(styles)(VendorReady));
+export default withRouter(withStyles(styles)(VendorDispatched));

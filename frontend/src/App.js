@@ -25,6 +25,7 @@ import Vendor from "./components/Vendor";
 import VendorAdd from "./components/VendorAdd";
 import VendorView from "./components/VendorView";
 import VendorReady from "./components/VendorReady";
+import VendorDispatched from "./components/VendorDispatched";
 
 function App(props) {
   return (
@@ -38,6 +39,7 @@ function App(props) {
         <Route exact path="/vendor/add" component={VendorAdd} />
         <Route exact path="/vendor/view" component={VendorView} />
         <Route exact path="/vendor/ready" component={VendorReady} />
+        <Route exact path="/vendor/dispatched" component={VendorDispatched} />
       </Switch>
     </Router>
   );

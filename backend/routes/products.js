@@ -136,4 +136,23 @@ router.post("/dispatch", (req, res) => {
     });
 });
 
+router.post("/dispatched", (req, res) => {
+  let sellerID = req.body.sellerID;
+
+  console.log(sellerID);
+
+  Product.find({
+    sellerID: sellerID,
+    isCancelled: false,
+    hasDispatched: true
+  })
+    .then(products => {
+      res.status(200).json(products);
+    })
+    .catch(err => {
+      res.status(200).send(err);
+      console.log(err);
+    });
+});
+
 module.exports = router;
