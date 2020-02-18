@@ -70,7 +70,9 @@ class Register extends Component {
       password: "",
       firstName: "",
       lastName: "",
-      type: ""
+      type: "",
+      error: "",
+      color: "green"
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -87,12 +89,12 @@ class Register extends Component {
   }
 
   onSubmit(event) {
-    console.log("hi");
+    // console.log("hi");
 
     event.preventDefault();
 
     const user = this.state;
-    console.log(user);
+    // console.log(user);
 
     if (
       user["email"] !== "" &&
@@ -101,25 +103,57 @@ class Register extends Component {
       user["lastName"] !== "" &&
       user["type"] !== ""
     ) {
-      console.log("***");
+      // console.log("***");
       axios
         .post("http://localhost:4000/user/add", user)
         .then(res => {
-          console.log("**");
-          console.log(res.data);
+          // console.log("**");
+          // console.log(res.data.User);
+          this.setState({
+            error: res.data.User,
+            color: "green"
+          });
         })
         .catch(err => {
           // console.log(user);
-          console.log("here");
-          console.log(err);
+          // console.log("here");
+          // console.log(err.data);
+          this.setState({
+            error: "Cannot Register User",
+            color: "red"
+          });
         });
+
+      this.setState({
+        email: "",
+        password: "",
+        firstName: "",
+        lastName: "",
+        type: ""
+      });
     } else {
-      console.log("****");
+      // console.log("****");
+
+      this.setState({
+        email: this.state.email,
+        password: "",
+        firstName: this.state.firstName,
+        lastName: this.state.lastName,
+        type: this.state.type,
+        error: "All fields are Mandatory!",
+        color: "red"
+      });
     }
   }
 
   render() {
     const { classes } = this.props;
+    const styles = {
+      errorColor: {
+        color: this.state.color
+      }
+    };
+
     return (
       <Container>
         <Container component="header" maxWidth="xl">
@@ -258,6 +292,12 @@ class Register extends Component {
                   <Link href="/LogIn" variant="body2">
                     Already have an account? Log in
                   </Link>
+                </Grid>
+              </Grid>
+
+              <Grid container>
+                <Grid item>
+                  <p style={styles.errorColor}>{this.state.error}</p>
                 </Grid>
               </Grid>
             </form>
