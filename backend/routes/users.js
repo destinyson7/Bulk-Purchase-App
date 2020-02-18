@@ -1,6 +1,9 @@
+require("dotenv").config();
+
 const router = require("express").Router();
 let User = require("./../models/user");
 const { check, validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
 
 // Getting all the users
 router.route("/").get((req, res) => {
@@ -22,7 +25,13 @@ router.post(
     check("lastName").isAlpha()
   ],
   (req, res) => {
-    let user = new User(req.body);
+    let user = new User({
+      email: req.body.email,
+      password: req.body.password,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      type: req.body.type
+    });
 
     console.log(user);
     // console.log("heyya");
@@ -60,11 +69,25 @@ router.post("/login", (req, res) => {
   console.log(email, password, type);
 
   User.findOne({ email: email }, (err, user) => {
+    console.log("found");
     if (err) {
       res.json(err);
     }
+    console.log(user);
+    console.log(type, user.type);
+    console.log(password, user.password);
     if (user && user.password === password && user.type === type) {
-      res.json(user);
+      const payload = {
+        id: user.id,
+        email: user.email,
+        type: user.type
+      };
+
+      console.log(process.env.SECRET_OR_KEY);
+      console.log(payload);
+      token = jwt.sign(payload, process.env.SECRET_OR_KEY);
+      console.log("******");
+      res.send(token);
     } else {
       res.json({ data: "Invalid Credentials" });
     }

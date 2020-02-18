@@ -89,7 +89,7 @@ class LogIn extends Component {
     event.preventDefault();
 
     const user = this.state;
-    console.log(user);
+    console.log("user is", user);
 
     if (
       user["email"] !== "" &&
@@ -100,11 +100,11 @@ class LogIn extends Component {
       axios
         .post("http://localhost:4000/users/login", user)
         .then(res => {
-          console.log("**");
-          console.log(res.data);
+          // console.log("**");
+          // console.log(res.data);
 
           if (res.data.data === "Invalid Credentials") {
-            console.log("invalid");
+            // console.log("invalid");
             this.setState({
               error: "Invalid Credentials",
               color: "red",
@@ -113,7 +113,8 @@ class LogIn extends Component {
               type: this.state.type
             });
           } else {
-            console.log("valid");
+            // console.log("valid");
+            const type = this.state.type;
             this.setState({
               error: "Logged in successfully!",
               color: "green",
@@ -121,11 +122,18 @@ class LogIn extends Component {
               password: "",
               type: ""
             });
+            localStorage.setItem("access-token", res.data);
+
+            // if (type === "customer") {
+            //   this.props.history.push("/Customer");
+            // } else {
+            //   this.props.history.push("/Vendor");
+            // }
           }
         })
         .catch(err => {
-          // console.log(user);
-          // console.log("here");
+          console.log(user);
+          console.log("here");
           console.log(err);
           this.setState({
             error: "Cannot login user",

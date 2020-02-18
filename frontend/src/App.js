@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -20,19 +20,23 @@ import "./App.css";
 import Register from "./components/Register";
 import LogIn from "./components/LogIn";
 import NavBar from "./components/Navbar";
+import AuthenticatedComponent from "./components/AuthenticatedComponent";
 import Vendor from "./components/Vendor";
 import VendorAdd from "./components/VendorAdd";
+import VendorView from "./components/VendorView";
 
 function App(props) {
   return (
     <Router>
-      <div className="container">
+      <Switch>
+        <Route exact path="/Auth" component={AuthenticatedComponent} />
         <Route exact path="/" component={LogIn} />
-        <Route path="/register" component={Register} />
-        <Route path="/login" component={LogIn} />
+        <Route exact path="/register" component={Register} />
+        <Route exact path="/login" component={LogIn} />
         <Route exact path="/vendor" component={Vendor} />
-        <Route path="/vendor/add" component={VendorAdd} />
-      </div>
+        <Route exact path="/vendor/add" component={VendorAdd} />
+        <Route exact path="/vendor/view" component={VendorView} />
+      </Switch>
     </Router>
   );
 }

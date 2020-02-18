@@ -21,6 +21,9 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
+import { getJwt } from "./../helpers/jwt";
+import axios from "axios";
+import { withRouter } from "react-router-dom";
 
 function Copyright() {
   return (
@@ -85,6 +88,37 @@ const styles = theme => ({
 class Vendor extends Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      userData: ""
+    };
+  }
+
+  componentDidMount() {
+    const jwt = getJwt();
+
+    console.log("jwt", jwt);
+
+    if (!jwt) {
+      this.props.history.push("/LogIn");
+    } else {
+      axios
+        .get("http://localhost:4000/auth", {
+          headers: { authorization: `Bearer: ${jwt}` }
+        })
+        .then(res =>
+          this.setState({
+            userData: res.data
+          })
+        )
+        .catch(err => {
+          console.log("now");
+          // console.log(this.state.userData);
+          console.log(err);
+          localStorage.removeItem("access-token");
+          this.props.history.push("/LogIn");
+        });
+    }
   }
 
   render() {
@@ -109,7 +143,7 @@ class Vendor extends Component {
             <Link
               variant="button"
               color="textPrimary"
-              href="/vendor/add"
+              href="/Vendor/add"
               className={classes.link}
             >
               Add
@@ -117,7 +151,7 @@ class Vendor extends Component {
             <Link
               variant="button"
               color="textPrimary"
-              href="#"
+              href="/vendor/view"
               className={classes.link}
             >
               View
@@ -125,7 +159,7 @@ class Vendor extends Component {
             <Link
               variant="button"
               color="textPrimary"
-              href="#"
+              href="/vendor/ready"
               className={classes.link}
             >
               Ready to Dispatch
@@ -133,7 +167,7 @@ class Vendor extends Component {
             <Link
               variant="button"
               color="textPrimary"
-              href="#"
+              href="/vendor/dispatched"
               className={classes.link}
             >
               Dispatched
@@ -153,4 +187,4 @@ class Vendor extends Component {
   }
 }
 
-export default withStyles(styles)(Vendor);
+export default withRouter(withStyles(styles)(Vendor));

@@ -21,6 +21,9 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
+import { getJwt } from "./../helpers/jwt";
+import axios from "axios";
+import { withRouter } from "react-router-dom";
 
 function Copyright() {
   return (
@@ -85,10 +88,124 @@ const styles = theme => ({
 class VendorAdd extends Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      name: "",
+      price: "",
+      quantity: "",
+      error: "",
+      userData: ""
+    };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+  }
+
+  componentDidMount() {
+    console.log("mount start");
+    const jwt = getJwt();
+
+    console.log("jwt", jwt);
+
+    if (!jwt) {
+      this.props.history.push("/LogIn");
+    } else {
+      console.log("else", jwt);
+      axios
+        .get("http://localhost:4000/auth", {
+          headers: { authorization: `Bearer: ${jwt}` }
+        })
+        .then(res => {
+          console.log("yo", this.state);
+
+          this.setState({
+            userData: res.data
+          });
+          console.log(this.state);
+        })
+        .catch(err => {
+          console.log("haha", JSON.stringify(err));
+          localStorage.removeItem("access-token");
+          this.props.history.push("/LogIn");
+        });
+      console.log("final");
+    }
+  }
+
+  handleChange(event) {
+    console.log("here");
+    console.log(this.state);
+    const { name, value } = event.target;
+    this.setState({
+      [name]: value
+    });
+    // console.log(this.state)
+  }
+
+  onSubmit(event) {
+    // console.log("hi");
+
+    event.preventDefault();
+
+    const product = {
+      name: this.state.name,
+      price: this.state.price,
+      quantity: this.state.quantity,
+      sellerID: this.state.userData.id
+    };
+
+    if (
+      product["name"] !== "" &&
+      product["price"] !== "" &&
+      product["quantity"] !== "" &&
+      product["sellerID"] !== ""
+    ) {
+      console.log("posting", product);
+      axios
+        .post("http://localhost:4000/products/add", product)
+        .then(res => {
+          // console.log("**");
+          // console.log(res.data.User);
+          this.setState({
+            error: "Product Added Succesfully!",
+            color: "green",
+            name: "",
+            price: "",
+            quantity: ""
+          });
+        })
+        .catch(err => {
+          // console.log("errored");
+          this.setState({
+            error: "Error: Cannot Add Product",
+            color: "red",
+            name: this.state.name,
+            price: this.state.price,
+            quantity: this.state.quantity
+          });
+        });
+    } else {
+      // console.log("****");
+
+      this.setState({
+        name: this.state.name,
+        price: this.state.price,
+        quantity: this.state.quantity,
+        error: "All fields are Mandatory!",
+        color: "red"
+      });
+    }
   }
 
   render() {
     const { classes } = this.props;
+
+    const styles = {
+      errorColor: {
+        color: this.state.color
+      }
+    };
+
     return (
       <div>
         <AppBar
@@ -113,7 +230,7 @@ class VendorAdd extends Component {
               <Link
                 variant="button"
                 color="textPrimary"
-                href="#"
+                href="/vendor/view"
                 className={classes.link}
               >
                 View
@@ -121,7 +238,7 @@ class VendorAdd extends Component {
               <Link
                 variant="button"
                 color="textPrimary"
-                href="#"
+                href="/vendor/ready"
                 className={classes.link}
               >
                 Ready to Dispatch
@@ -129,7 +246,7 @@ class VendorAdd extends Component {
               <Link
                 variant="button"
                 color="textPrimary"
-                href="#"
+                href="/vendor/dispatched"
                 className={classes.link}
               >
                 Dispatched
@@ -172,6 +289,8 @@ class VendorAdd extends Component {
                     label="Name of Product"
                     name="name"
                     autoComplete="name"
+                    onChange={this.handleChange}
+                    value={this.state.name}
                   />
                 </Grid>
 
@@ -189,6 +308,8 @@ class VendorAdd extends Component {
                     label="Price of Bundle"
                     id="price"
                     autoComplete="price"
+                    onChange={this.handleChange}
+                    value={this.state.price}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -205,6 +326,8 @@ class VendorAdd extends Component {
                     label="Quantity in Bundle"
                     id="quantity"
                     autoComplete="quantity"
+                    onChange={this.handleChange}
+                    value={this.state.quantity}
                   />
                 </Grid>
               </Grid>
@@ -214,9 +337,17 @@ class VendorAdd extends Component {
                 fullWidth
                 variant="contained"
                 color="primary"
+                onClick={this.onSubmit}
               >
                 Add Product
               </Button>
+              <br />
+              <br />
+              <Grid container>
+                <Grid item>
+                  <p style={styles.errorColor}>{this.state.error}</p>
+                </Grid>
+              </Grid>
             </form>
           </div>
           <Box mt={5}>
@@ -228,4 +359,4 @@ class VendorAdd extends Component {
   }
 }
 
-export default withStyles(styles)(VendorAdd);
+export default withRouter(withStyles(styles)(VendorAdd));
