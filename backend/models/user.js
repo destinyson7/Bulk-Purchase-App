@@ -30,6 +30,16 @@ let UserSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true
+    },
+
+    rating: {
+      type: Number,
+      default: 3
+    },
+
+    rateCount: {
+      type: Number,
+      default: 1
     }
   },
 

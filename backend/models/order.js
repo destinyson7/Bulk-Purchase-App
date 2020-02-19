@@ -66,4 +66,4 @@ let OrderSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("orders", OrderSchema);
+module.exports = mongoose.model("Order", OrderSchema);

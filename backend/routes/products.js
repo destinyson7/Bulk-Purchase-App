@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const router = require("express").Router();
 let Product = require("./../models/product");
+let User = require("../models/user");
 const { check, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
@@ -150,7 +151,71 @@ router.post("/dispatched", (req, res) => {
       res.status(200).json(products);
     })
     .catch(err => {
-      res.status(200).send(err);
+      res.status(500).json(err);
+      console.log(err);
+    });
+});
+
+router.post("/search", (req, res) => {
+  Product.find({
+    name: req.body.search,
+    isCancelled: false,
+    isReady: false,
+    hasDispatched: false,
+    quantityRemaining: { $gte: 1 }
+  })
+    .then(products => {
+      toRet = [];
+      let done = 0;
+      if (products.length === 0) {
+        return res.status(200).send(toRet);
+      } else {
+        for (var i = 0; i < products.length; i++) {
+          let product = products[i];
+          let sellerID = product.sellerID;
+          User.find(
+            {
+              _id: sellerID
+            },
+            (err, user) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+
+              let temp = {};
+              temp._id = product._id;
+              temp.id = done + 1;
+              temp.name = product.name;
+              temp.vendorName = user[0].firstName + " " + user[0].lastName;
+              temp.price = product.price;
+              temp.quantity = product.quantity;
+              temp.quantityRemaining = product.quantityRemaining;
+              temp.isCancelled = product.isCancelled;
+              temp.isReady = product.isReady;
+              temp.hasDispatched = product.hasDispatched;
+              temp.vendorRating = user[0].rating / user[0].rateCount;
+              toRet.push(temp);
+              done++;
+              console.log(i + 1, temp);
+              console.log(done, toRet);
+
+              if (done === products.length) {
+                return res.status(200).send(toRet);
+              }
+            }
+          );
+        }
+
+        // return res.status(200).send(toRet);
+      }
+
+      //
+      // console.log("FINAL");
+      // console.log(toRet);
+      //
+    })
+    .catch(err => {
+      res.status(200).send([]);
       console.log(err);
     });
 });

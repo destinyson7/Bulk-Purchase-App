@@ -25,6 +25,13 @@ import Input from "@material-ui/core/Input";
 import { getJwt } from "./../helpers/jwt";
 import axios from "axios";
 import { withRouter } from "react-router-dom";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
 
 function Copyright() {
   return (
@@ -37,6 +44,28 @@ function Copyright() {
       {"."}
     </Typography>
   );
+}
+
+const StyledTableCell = withStyles(theme => ({
+  head: {
+    backgroundColor: theme.palette.common.black,
+    color: theme.palette.common.white
+  },
+  body: {
+    fontSize: 14
+  }
+}))(TableCell);
+
+const StyledTableRow = withStyles(theme => ({
+  root: {
+    "&:nth-of-type(odd)": {
+      backgroundColor: theme.palette.background.default
+    }
+  }
+}))(TableRow);
+
+function createData(name, id, price, quantityRemaining) {
+  return { name, id, price, quantityRemaining };
 }
 
 const styles = theme => ({
@@ -84,6 +113,9 @@ const styles = theme => ({
       paddingBottom: theme.spacing(6)
     }
   },
+  table: {
+    minWidth: 700
+  },
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1)
@@ -98,8 +130,13 @@ class CustomerSearch extends Component {
     super(props);
 
     this.state = {
-      userData: ""
+      userData: "",
+      search: "",
+      products: {}
     };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -129,8 +166,82 @@ class CustomerSearch extends Component {
     }
   }
 
+  handleChange(event) {
+    // console.log(this.state);
+    const { name, value, type } = event.target;
+    this.setState(
+      {
+        [name]: value
+      },
+      () => {
+        if (value === "Price") {
+          let newProducts = this.state.products;
+          if (newProducts && newProducts.length) {
+            newProducts.sort(function(a, b) {
+              return a.price - b.price;
+            });
+            this.setState({
+              products: newProducts
+            });
+          }
+
+          return;
+        } else if (value === "Remaining Quantity") {
+          let newProducts = this.state.products;
+          if (newProducts && newProducts.length) {
+            newProducts.sort(function(a, b) {
+              return a.quantityRemaining - b.quantityRemaining;
+            });
+            this.setState({
+              products: newProducts
+            });
+            console.log("newProducts", this.state.products);
+          }
+
+          return;
+        } else if (value === "Vendor Rating") {
+          let newProducts = this.state.products;
+          if (newProducts && newProducts.length) {
+            newProducts.sort(function(a, b) {
+              return b.vendorRating - a.vendorRating;
+            });
+            this.setState({
+              products: newProducts
+            });
+            console.log("newProducts", this.state.products);
+          }
+
+          return;
+        } else {
+          return;
+        }
+      }
+    );
+  }
+
+  onSubmit(event) {
+    event.preventDefault();
+
+    axios
+      .post("http://localhost:4000/products/search", {
+        search: this.state.search
+      })
+      .then(resp => {
+        // console.log("data", resp.data);
+        // console.log("id", this.state.userData.id);
+        this.setState({
+          products: resp.data
+        });
+        console.log(this.state);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
   render() {
     const { classes } = this.props;
+
     return (
       <div>
         <AppBar
@@ -172,43 +283,102 @@ class CustomerSearch extends Component {
           </Toolbar>
         </AppBar>
 
-        <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          <div className={classes.paper}>
-            <br />
-            <Typography component="h1" variant="h5">
-              <center>Search</center>
-            </Typography>
+        <br />
 
-            <form className={classes.form} noValidate>
-              <TextField
-                variant="outlined"
-                mahttps:required //www.geeksforgeeks.org/how-to-align-button-to-right-side-of-text-box-in-bootstrap/rgin="normal"
-                fullWidth
-                id="search"
-                name="search"
-                autoComplete="search"
-                autoFocus
-                onChange={this.handleChange}
-                value={this.state.search}
-              />
-
+        <div className="input-group">
+          <input
+            type="text"
+            className="form-control"
+            name="search"
+            placeholder="Search for a Product"
+            aria-label="Amount (to the nearest dollar)"
+            onChange={this.handleChange}
+            value={this.state.search}
+          />
+          <div className="input-group-append">
+            <span className="input-group-btn">
               <Button
-                type="submit"
-                fullWidth
                 variant="contained"
                 color="primary"
-                className={classes.submit}
                 onClick={this.onSubmit}
               >
                 Search
               </Button>
-            </form>
+            </span>
+            <span className="input-group-text">
+              <select
+                name="sortBy"
+                type="select"
+                value={this.state.sortBy}
+                onChange={this.handleChange}
+              >
+                <option selected value="None">
+                  Sort By (default: None)
+                </option>
+                <option value="Price">Price</option>
+                <option value="Remaining Quantity">Remaining Quantity</option>
+                <option value="Vendor Rating">Vendor Rating</option>
+              </select>
+            </span>
           </div>
-          <Box mt={8}>
-            <Copyright />
-          </Box>
-        </Container>
+        </div>
+
+        <br />
+        <br />
+        <br />
+        <TableContainer component={Paper}>
+          <Table className={classes.table} aria-label="customized table">
+            <TableHead>
+              <TableRow>
+                <StyledTableCell>Sr. No</StyledTableCell>
+                <StyledTableCell>Vendor Name</StyledTableCell>
+                <StyledTableCell>Vendor Rating</StyledTableCell>
+                <StyledTableCell>Product Name</StyledTableCell>
+                <StyledTableCell align="right">Price</StyledTableCell>
+                <StyledTableCell align="right">
+                  Remaining Quantity
+                </StyledTableCell>
+                <StyledTableCell align="right">Cancel ?</StyledTableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {this.state.products && this.state.products.length ? (
+                this.state.products.map(row => (
+                  <StyledTableRow key={row.id}>
+                    <StyledTableCell component="th" scope="row">
+                      {row.id}
+                    </StyledTableCell>
+                    <StyledTableCell component="th" scope="row">
+                      {row.vendorName}
+                    </StyledTableCell>
+                    <StyledTableCell component="th" scope="row">
+                      {row.vendorRating}
+                    </StyledTableCell>
+                    <StyledTableCell component="th" scope="row">
+                      {row.name}
+                    </StyledTableCell>
+                    <StyledTableCell align="right">{row.price}</StyledTableCell>
+                    <StyledTableCell align="right">
+                      {row.quantityRemaining}
+                    </StyledTableCell>
+                    <StyledTableCell align="right">
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        name="isCancelled"
+                        onClick={e => this.handleChange(e, row.id)}
+                      >
+                        Cancel
+                      </Button>
+                    </StyledTableCell>
+                  </StyledTableRow>
+                ))
+              ) : (
+                <StyledTableRow></StyledTableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
     );
   }

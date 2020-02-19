@@ -32,6 +32,9 @@ app.use("/auth", authRoutes);
 const productRoutes = require("./routes/products");
 app.use("/products", productRoutes);
 
+const orderRoutes = require("./routes/orders");
+app.use("/orders", orderRoutes);
+
 app.listen(PORT, () => {
   console.log("Server is running on port: " + PORT);
 });
