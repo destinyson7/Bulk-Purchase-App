@@ -20,28 +20,9 @@ let OrderSchema = new mongoose.Schema(
       trim: true
     },
 
-    sellerID: {
-      type: String,
-      required: true,
-      trim: true
-    },
-
-    isCancelled: {
+    isReviewed: {
       type: Boolean,
-      default: false,
-      trim: true
-    },
-
-    isReady: {
-      type: Boolean,
-      default: false,
-      trim: true
-    },
-
-    hasDispatched: {
-      type: Boolean,
-      default: false,
-      trim: true
+      default: false
     },
 
     productRating: {

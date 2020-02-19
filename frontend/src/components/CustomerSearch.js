@@ -137,6 +137,8 @@ class CustomerSearch extends Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.handleQuantity = this.handleQuantity.bind(this);
+    this.order = this.order.bind(this);
   }
 
   componentDidMount() {
@@ -151,11 +153,13 @@ class CustomerSearch extends Component {
         .get("http://localhost:4000/auth", {
           headers: { authorization: `Bearer: ${jwt}` }
         })
-        .then(res =>
+        .then(res => {
           this.setState({
             userData: res.data
-          })
-        )
+          });
+
+          console.log("userData is", this.state.userData);
+        })
         .catch(err => {
           console.log("now");
           // console.log(this.state.userData);
@@ -233,6 +237,63 @@ class CustomerSearch extends Component {
           products: resp.data
         });
         console.log(this.state);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  handleQuantity(event, id) {
+    const { value } = event.target;
+    this.setState({
+      [id]: value
+    });
+    console.log(this.state);
+  }
+
+  order(event, id, quantityRemaining) {
+    console.log("ordering");
+
+    const entered = this.state[id];
+
+    if (isNaN(entered)) {
+      alert("Please enter a number.");
+      return;
+    }
+
+    if (entered == undefined || entered <= 0) {
+      alert("Enter a positive quantity");
+      return;
+    }
+
+    if (entered > quantityRemaining) {
+      alert("Your required quantity should be less than remaining quantity.");
+      return;
+    }
+
+    axios
+      .post("http://localhost:4000/orders/buy", {
+        productID: id,
+        customerID: this.state.userData.id,
+        buyQuantity: entered
+      })
+      .then(res => {
+        axios
+          .post("http://localhost:4000/products/search", {
+            search: this.state.search
+          })
+          .then(resp => {
+            alert("Bought succesfully");
+            // console.log("data", resp.data);
+            // console.log("id", this.state.userData.id);
+            this.setState({
+              products: resp.data
+            });
+            console.log(this.state);
+          })
+          .catch(err => {
+            console.log(err);
+          });
       })
       .catch(err => {
         console.log(err);
@@ -338,7 +399,8 @@ class CustomerSearch extends Component {
                 <StyledTableCell align="right">
                   Remaining Quantity
                 </StyledTableCell>
-                <StyledTableCell align="right">Cancel ?</StyledTableCell>
+                <StyledTableCell align="right">Order Quantity</StyledTableCell>
+                <StyledTableCell align="right">Order ?</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -362,13 +424,25 @@ class CustomerSearch extends Component {
                       {row.quantityRemaining}
                     </StyledTableCell>
                     <StyledTableCell align="right">
+                      <form
+                        className={classes.root}
+                        noValidate
+                        autoComplete="off"
+                        onChange={e => this.handleQuantity(e, row._id)}
+                      >
+                        <TextField id="standard-basic" label="Quantity" />
+                      </form>
+                    </StyledTableCell>
+                    <StyledTableCell align="right">
                       <Button
                         variant="contained"
-                        color="secondary"
+                        color="primary"
                         name="isCancelled"
-                        onClick={e => this.handleChange(e, row.id)}
+                        onClick={e =>
+                          this.order(e, row._id, row.quantityRemaining)
+                        }
                       >
-                        Cancel
+                        Order
                       </Button>
                     </StyledTableCell>
                   </StyledTableRow>

@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const router = require("express").Router();
 let Order = require("./../models/order");
+let Product = require("../models/product");
 const { check, validationResult } = require("express-validator");
 
 // Getting all the users
@@ -15,33 +16,71 @@ router.route("/").get((req, res) => {
   });
 });
 
-router.post("/add", [check("quantity").isNumeric()], (req, res) => {
-  // console.log("here");
-  // console.log(req.body);
-  let order = new Order({
-    customerID: req.body.customerID,
-    productID: req.body.productID,
-    quantity: req.body.quantity,
-    sellerID: req.body.sellerID
-  });
+router.post("/buy", (req, res) => {
+  const id = req.body.productID;
+  const customerID = req.body.customerID;
+  const buyQuantity = req.body.buyQuantity;
 
-  console.log("here", order);
-  // console.log("heyya");
+  console.log("parameters are", req.body);
 
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
-  }
+  Product.find(
+    {
+      _id: id
+    },
+    (err, products) => {
+      if (err) {
+        return res.status(200).json(err);
+      }
 
-  order
-    .save()
-    .then(order => {
-      res.status(200).json({ Order: "Order added successfully" });
-    })
-    .catch(err => {
-      // console.log("yep", err);
-      res.status(400).send(err);
-    });
+      console.log(products);
+
+      let quantityRemaining = products[0].quantityRemaining;
+
+      if (quantityRemaining < buyQuantity) {
+        return res.status(200).json({ success: false });
+      }
+
+      let order1 = new Order({
+        productID: id,
+        customerID: customerID,
+        quantity: buyQuantity
+      });
+
+      console.log("new order is", order1);
+
+      quantityRemaining -= buyQuantity;
+
+      if (quantityRemaining !== 0) {
+        Product.findByIdAndUpdate(
+          { _id: id },
+          { quantityRemaining: quantityRemaining },
+          (err, product) => {
+            if (err) {
+              return res.status(200).json(err);
+            }
+            console.log("if");
+            order1.save();
+            console.log("if saved");
+            return res.status(200).json({ success: true });
+          }
+        );
+      } else {
+        Product.findByIdAndUpdate(
+          { _id: id },
+          { quantityRemaining: 0, isReady: true },
+          (err, product) => {
+            if (err) {
+              return res.status(200).json(err);
+            }
+            console.log("else");
+            order1.save();
+            console.log("else saved");
+            return res.status(200).json({ success: true });
+          }
+        );
+      }
+    }
+  );
 });
 
 // Getting a user by id

@@ -3,6 +3,7 @@ require("dotenv").config();
 const router = require("express").Router();
 let Product = require("./../models/product");
 let User = require("../models/user");
+// let User = require("../models/user");
 const { check, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
@@ -69,7 +70,8 @@ router.post("/seller", (req, res) => {
     sellerID: sellerID,
     isCancelled: false,
     isReady: false,
-    hasDispatched: false
+    hasDispatched: false,
+    quantityRemaining: { $gte: 1 }
   })
     .then(products => {
       res.status(200).json(products);
@@ -113,7 +115,6 @@ router.post("/ready", (req, res) => {
     sellerID: sellerID,
     isCancelled: false,
     quantityRemaining: 0,
-    isReady: true,
     hasDispatched: false
   })
     .then(products => {
@@ -127,14 +128,17 @@ router.post("/ready", (req, res) => {
 
 router.post("/dispatch", (req, res) => {
   let id = req.body.id;
-  Product.findByIdAndUpdate({ _id: id }, { hasDispatched: true })
-    .exec()
-    .then(res => {
-      res.status(200).send("cancelled");
-    })
-    .catch(err => {
-      res.status(400).json(err);
-    });
+  Product.findByIdAndUpdate(
+    { _id: id },
+    { hasDispatched: true },
+    (err, product) => {
+      if (err) {
+        res.status(400).json(err);
+      }
+      console.log("dispatching");
+      return res.status(200).json({ success: true });
+    }
+  );
 });
 
 router.post("/dispatched", (req, res) => {
@@ -196,8 +200,8 @@ router.post("/search", (req, res) => {
               temp.vendorRating = user[0].rating / user[0].rateCount;
               toRet.push(temp);
               done++;
-              console.log(i + 1, temp);
-              console.log(done, toRet);
+              // console.log(i + 1, temp);
+              // console.log(done, toRet);
 
               if (done === products.length) {
                 return res.status(200).send(toRet);
