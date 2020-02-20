@@ -253,6 +253,11 @@ class CustomerSearch extends Component {
     console.log(this.state);
   }
 
+  edit(event, orderID, productID, oldQuantity, newQuantity) {
+    const customerID = this.state.userData.id;
+    const entered = this.state[productID];
+  }
+
   order(event, id, quantityRemaining) {
     console.log("ordering");
 

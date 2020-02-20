@@ -286,7 +286,6 @@ class VendorAdd extends Component {
                     required
                     fullWidth
                     id="name"
-                    label="Name of Product"
                     name="name"
                     autoComplete="name"
                     onChange={this.handleChange}
@@ -305,7 +304,6 @@ class VendorAdd extends Component {
                     required
                     fullWidth
                     name="price"
-                    label="Price of Bundle"
                     id="price"
                     autoComplete="price"
                     onChange={this.handleChange}
@@ -323,7 +321,6 @@ class VendorAdd extends Component {
                     required
                     fullWidth
                     name="quantity"
-                    label="Quantity in Bundle"
                     id="quantity"
                     autoComplete="quantity"
                     onChange={this.handleChange}

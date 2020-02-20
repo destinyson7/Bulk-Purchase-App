@@ -124,24 +124,26 @@ router.post("/view", (req, res) => {
 
               let temp = {};
               temp._id = order._id;
+              temp.productID = order.productID;
               temp.id = done + 1;
               temp.name = product[0].name;
               temp.quantity = order.quantity;
+              temp.quantityRemaining = product[0].quantityRemaining;
 
               if (product[0].isCancelled) {
-                temp.status = "Cancelled";
+                temp.status = "CANCELLED";
                 temp.color = "red";
               } else if (product[0].hasDispatched) {
-                temp.status = "Dispatched";
+                temp.status = "DISPATCHED";
                 temp.color = "green";
               } else if (
                 product[0].isReady ||
                 product[0].quantityRemaining === 0
               ) {
-                temp.status = "Placed";
-                temp.color = "purple";
+                temp.status = "PLACED";
+                temp.color = "blue";
               } else {
-                temp.status = "Waiting";
+                temp.status = "WAITING";
                 temp.color = "black";
               }
 
@@ -158,6 +160,94 @@ router.post("/view", (req, res) => {
         }
 
         // return res.status(200).send(toRet);
+      }
+    }
+  );
+});
+
+router.post("/edit", (req, res) => {
+  const customerID = req.body.customerID;
+  const orderID = req.body.orderID;
+  const productID = req.body.productID;
+  const oldQuantity = req.body.oldQuantity;
+  const newQuantity = req.body.newQuantity;
+
+  console.log(
+    "entered",
+    customerID,
+    orderID,
+    productID,
+    oldQuantity,
+    newQuantity
+  );
+
+  Product.find(
+    {
+      _id: productID
+    },
+    (err, products) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      let quantityRemaining = products[0].quantityRemaining + oldQuantity;
+
+      if (quantityRemaining < newQuantity) {
+        return res.status(500).json({ success: false });
+      }
+
+      console.log("quanitity", quantityRemaining);
+
+      quantityRemaining -= newQuantity;
+
+      if (quantityRemaining !== 0) {
+        Product.findByIdAndUpdate(
+          { _id: productID },
+          { quantityRemaining: quantityRemaining },
+          (err, product) => {
+            if (err) {
+              return res.status(200).json(err);
+            }
+            console.log("if");
+            Order.findByIdAndUpdate(
+              { _id: orderID },
+              { quantity: newQuantity },
+              (err, order) => {
+                if (err) {
+                  return res.status(500).json(err);
+                }
+
+                return res.status(200).json({ success: true });
+              }
+            );
+            console.log("if saved");
+            // return res.status(200).json({ success: true });
+          }
+        );
+      } else {
+        Product.findByIdAndUpdate(
+          { _id: productID },
+          { quantityRemaining: 0, isReady: true },
+          (err, product) => {
+            if (err) {
+              return res.status(200).json(err);
+            }
+
+            Order.findByIdAndUpdate(
+              { _id: orderID },
+              { quantity: newQuantity },
+              (err, order) => {
+                if (err) {
+                  return res.status(500).json(err);
+                }
+
+                return res.status(200).json({ success: true });
+              }
+            );
+            console.log("else saved");
+            // return res.status(200).json({ success: true });
+          }
+        );
       }
     }
   );

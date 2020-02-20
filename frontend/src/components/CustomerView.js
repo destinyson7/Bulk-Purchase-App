@@ -124,6 +124,8 @@ class CustomerView extends Component {
     this.state = {
       userData: ""
     };
+
+    this.handleQuantity = this.handleQuantity.bind(this);
   }
 
   componentDidMount() {
@@ -163,6 +165,73 @@ class CustomerView extends Component {
           this.props.history.push("/LogIn");
         });
     }
+  }
+
+  handleQuantity(event, id) {
+    const { value } = event.target;
+    this.setState({
+      [id]: value
+    });
+    console.log(this.state);
+  }
+
+  edit(event, orderID, productID, oldQuantity, quantityRemaining) {
+    console.log("ordering");
+
+    const entered = this.state[productID];
+
+    console.log(
+      "entered",
+      orderID,
+      productID,
+      oldQuantity,
+      entered,
+      quantityRemaining
+    );
+
+    if (isNaN(entered)) {
+      alert("Please enter a number.");
+      return;
+    }
+
+    if (entered == undefined || entered <= 0) {
+      alert("Enter a positive quantity");
+      return;
+    }
+
+    if (entered > quantityRemaining + oldQuantity) {
+      alert(
+        "Your required quantity should not exceed maximum avialable quantity."
+      );
+      return;
+    }
+
+    axios
+      .post("http://localhost:4000/orders/edit", {
+        customerID: this.state.userData.id,
+        orderID: orderID,
+        productID: productID,
+        oldQuantity: oldQuantity,
+        newQuantity: entered
+      })
+      .then(res => {
+        axios
+          .post("http://localhost:4000/orders/view", {
+            customerID: this.state.userData.id
+          })
+          .then(res => {
+            this.setState({
+              products: res.data
+            });
+            alert("Bought Succesfully");
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }
 
   render() {
@@ -220,6 +289,9 @@ class CustomerView extends Component {
                 <StyledTableCell align="center">
                   Quantity Ordered
                 </StyledTableCell>
+                <StyledTableCell align="center">
+                  Remaining Quantity
+                </StyledTableCell>
                 <StyledTableCell align="center">Edit Quantity</StyledTableCell>
                 <StyledTableCell align="center">Order ?</StyledTableCell>
                 <StyledTableCell align="center">Rate Order</StyledTableCell>
@@ -249,12 +321,16 @@ class CustomerView extends Component {
                     <StyledTableCell align="center" component="th" scope="row">
                       {row.quantity}
                     </StyledTableCell>
-                    {row.status === "Waiting" ? (
+                    <StyledTableCell align="center" component="th" scope="row">
+                      {row.quantityRemaining}
+                    </StyledTableCell>
+                    {row.status === "WAITING" ? (
                       <StyledTableCell align="center">
                         <form
                           className={classes.root}
                           noValidate
                           autoComplete="off"
+                          onChange={e => this.handleQuantity(e, row.productID)}
                         >
                           <TextField id="standard-basic" label="New Quantity" />
                         </form>
@@ -262,12 +338,21 @@ class CustomerView extends Component {
                     ) : (
                       <StyledTableCell align="center"></StyledTableCell>
                     )}
-                    {row.status === "Waiting" ? (
+                    {row.status === "WAITING" ? (
                       <StyledTableCell align="center">
                         <Button
                           variant="contained"
-                          color="secondary"
+                          color="primary"
                           name="isCancelled"
+                          onClick={e =>
+                            this.edit(
+                              e,
+                              row._id,
+                              row.productID,
+                              row.quantity,
+                              row.quantityRemaining
+                            )
+                          }
                         >
                           Order
                         </Button>
@@ -275,7 +360,7 @@ class CustomerView extends Component {
                     ) : (
                       <StyledTableCell align="center"></StyledTableCell>
                     )}
-                    {row.status === "Dispatched" ? (
+                    {row.status === "DISPATCHED" ? (
                       <StyledTableCell align="center">
                         <FormControl className={classes.formControl}>
                           <InputLabel id="demo-simple-select-helper-label">
@@ -291,13 +376,15 @@ class CustomerView extends Component {
                             <MenuItem value={4}>4</MenuItem>
                             <MenuItem value={5}>5</MenuItem>
                           </Select>
-                          <FormHelperText>Select from 1 to 5</FormHelperText>
+                          <FormHelperText>
+                            <b>Select from 1 to 5</b>
+                          </FormHelperText>
                         </FormControl>
                       </StyledTableCell>
                     ) : (
                       <StyledTableCell align="center"></StyledTableCell>
                     )}
-                    {row.status === "Dispatched" ? (
+                    {row.status === "DISPATCHED" ? (
                       <StyledTableCell align="center">
                         <Button
                           variant="outlined"
@@ -310,7 +397,7 @@ class CustomerView extends Component {
                     ) : (
                       <StyledTableCell align="center"></StyledTableCell>
                     )}
-                    {row.status === "Dispatched" ? (
+                    {row.status === "DISPATCHED" ? (
                       <StyledTableCell align="center">
                         <form
                           className={classes.root}
@@ -323,7 +410,7 @@ class CustomerView extends Component {
                     ) : (
                       <StyledTableCell align="center"></StyledTableCell>
                     )}
-                    {row.status === "Dispatched" ? (
+                    {row.status === "DISPATCHED" ? (
                       <StyledTableCell align="center">
                         <Button
                           variant="outlined"
