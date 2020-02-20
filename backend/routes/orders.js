@@ -68,6 +68,7 @@ router.post("/buy", (req, res) => {
         Product.findByIdAndUpdate(
           { _id: id },
           { quantityRemaining: 0, isReady: true },
+
           (err, product) => {
             if (err) {
               return res.status(200).json(err);
@@ -91,81 +92,75 @@ router.route("/:id", (req, res) => {
   });
 });
 
-//
-// router.post("/delete", (req, res) => {
-//   let id = req.body.id;
-//   Product.deleteOne({ _id: id })
-//     .exec()
-//     .then(res => {
-//       res.status(200).send("deleted");
-//     })
-//     .catch(err => {
-//       res.status(400).json(err);
-//     });
-// });
-//
-// router.post("/cancel", (req, res) => {
-//   let id = req.body.id;
-//   Product.findByIdAndUpdate({ _id: id }, { isCancelled: true })
-//     .exec()
-//     .then(res => {
-//       res.status(200).send("cancelled");
-//     })
-//     .catch(err => {
-//       res.status(400).json(err);
-//     });
-// });
-//
-// router.post("/ready", (req, res) => {
-//   let sellerID = req.body.sellerID;
-//
-//   console.log(sellerID);
-//
-//   Product.find({
-//     sellerID: sellerID,
-//     isCancelled: false,
-//     quantityRemaining: 0,
-//     isReady: true,
-//     hasDispatched: false
-//   })
-//     .then(products => {
-//       res.status(200).json(products);
-//     })
-//     .catch(err => {
-//       res.status(200).send(err);
-//       console.log(err);
-//     });
-// });
-//
-// router.post("/dispatch", (req, res) => {
-//   let id = req.body.id;
-//   Product.findByIdAndUpdate({ _id: id }, { hasDispatched: true })
-//     .exec()
-//     .then(res => {
-//       res.status(200).send("cancelled");
-//     })
-//     .catch(err => {
-//       res.status(400).json(err);
-//     });
-// });
-//
-// router.post("/dispatched", (req, res) => {
-//   let sellerID = req.body.sellerID;
-//
-//   console.log(sellerID);
-//
-//   Product.find({
-//     sellerID: sellerID,
-//     isCancelled: false,
-//     hasDispatched: true
-//   })
-//     .then(products => {
-//       res.status(200).json(products);
-//     })
-//     .catch(err => {
-//       res.status(200).send(err);
-//       console.log(err);
-//     });
-// });
+router.post("/view", (req, res) => {
+  const customerID = req.body.customerID;
+
+  console.log("parameters are", req.body);
+
+  Order.find(
+    {
+      customerID: customerID
+    },
+    (err, orders) => {
+      if (err) {
+        return res.status(200).json(err);
+      }
+
+      toRet = [];
+      let done = 0;
+      if (orders.length === 0) {
+        return res.status(200).send(toRet);
+      } else {
+        for (var i = 0; i < orders.length; i++) {
+          let order = orders[i];
+          Product.find(
+            {
+              _id: order.productID
+            },
+            (err, product) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+
+              let temp = {};
+              temp._id = order._id;
+              temp.id = done + 1;
+              temp.name = product[0].name;
+              temp.quantity = order.quantity;
+
+              if (product[0].isCancelled) {
+                temp.status = "Cancelled";
+                temp.color = "red";
+              } else if (product[0].hasDispatched) {
+                temp.status = "Dispatched";
+                temp.color = "green";
+              } else if (
+                product[0].isReady ||
+                product[0].quantityRemaining === 0
+              ) {
+                temp.status = "Placed";
+                temp.color = "purple";
+              } else {
+                temp.status = "Waiting";
+                temp.color = "black";
+              }
+
+              toRet.push(temp);
+              done++;
+              // console.log(i + 1, temp);
+              // console.log(done, toRet);
+
+              if (done === orders.length) {
+                return res.status(200).send(toRet);
+              }
+            }
+          );
+        }
+
+        // return res.status(200).send(toRet);
+      }
+    }
+  );
+});
 
 module.exports = router;

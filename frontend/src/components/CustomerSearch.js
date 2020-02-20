@@ -32,6 +32,8 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+import InputLabel from "@material-ui/core/InputLabel";
+import NativeSelect from "@material-ui/core/NativeSelect";
 
 function Copyright() {
   return (
@@ -356,6 +358,7 @@ class CustomerSearch extends Component {
             onChange={this.handleChange}
             value={this.state.search}
           />
+
           <div className="input-group-append">
             <span className="input-group-btn">
               <Button
@@ -367,19 +370,22 @@ class CustomerSearch extends Component {
               </Button>
             </span>
             <span className="input-group-text">
-              <select
-                name="sortBy"
-                type="select"
-                value={this.state.sortBy}
-                onChange={this.handleChange}
-              >
-                <option selected value="None">
-                  Sort By (default: None)
-                </option>
-                <option value="Price">Price</option>
-                <option value="Remaining Quantity">Remaining Quantity</option>
-                <option value="Vendor Rating">Vendor Rating</option>
-              </select>
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="age-native-helper">Sort by</InputLabel>
+                <NativeSelect
+                  value={this.state.sortBy}
+                  onChange={this.handleChange}
+                  name="sortBy"
+                >
+                  <option selected value="None">
+                    None
+                  </option>
+                  <option value="Price">Price</option>
+                  <option value="Remaining Quantity">Remaining Quantity</option>
+                  <option value="Vendor Rating">Vendor Rating</option>
+                </NativeSelect>
+                <FormHelperText>Default selected is None</FormHelperText>
+              </FormControl>
             </span>
           </div>
         </div>
