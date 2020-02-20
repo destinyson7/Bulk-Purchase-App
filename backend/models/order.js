@@ -25,19 +25,16 @@ let OrderSchema = new mongoose.Schema(
       default: false
     },
 
+    isRated: {
+      type: Boolean,
+      default: false
+    },
+
     productRating: {
       type: Number
     },
 
-    vendorRating: {
-      type: Number
-    },
-
     productReview: {
-      type: String
-    },
-
-    vendorReview: {
       type: String
     }
   },

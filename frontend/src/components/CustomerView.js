@@ -126,6 +126,9 @@ class CustomerView extends Component {
     };
 
     this.handleQuantity = this.handleQuantity.bind(this);
+    this.edit = this.edit.bind(this);
+    this.onChangeRating = this.onChangeRating.bind(this);
+    this.rate = this.rate.bind(this);
   }
 
   componentDidMount() {
@@ -169,8 +172,9 @@ class CustomerView extends Component {
 
   handleQuantity(event, id) {
     const { value } = event.target;
+    const key = "quantity" + id;
     this.setState({
-      [id]: value
+      [key]: value
     });
     console.log(this.state);
   }
@@ -178,7 +182,8 @@ class CustomerView extends Component {
   edit(event, orderID, productID, oldQuantity, quantityRemaining) {
     console.log("ordering");
 
-    const entered = this.state[productID];
+    const key = "quantity" + orderID;
+    const entered = this.state[key];
 
     console.log(
       "entered",
@@ -224,6 +229,66 @@ class CustomerView extends Component {
               products: res.data
             });
             alert("Bought Succesfully");
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  onChangeRating(event, orderID) {
+    const { value } = event.target;
+    const key = "rating" + orderID;
+    console.log("value is", orderID, value);
+    this.setState(
+      {
+        [key]: value
+      },
+      () => {
+        console.log("rating change", this.state);
+      }
+    );
+  }
+
+  rate(event, orderID, productID) {
+    event.preventDefault();
+    console.log("rating");
+    const key = "rating" + orderID;
+    console.log("entered2", orderID, productID);
+
+    const rating = this.state[key];
+
+    console.log("entered", orderID, productID, rating);
+
+    if (isNaN(rating)) {
+      alert("Please select a value");
+      return;
+    }
+
+    if (rating == undefined || rating <= 0) {
+      alert("Please select a value");
+      return;
+    }
+
+    axios
+      .post("http://localhost:4000/orders/rate", {
+        orderID: orderID,
+        productID: productID,
+        ratingGiven: rating
+      })
+      .then(res => {
+        axios
+          .post("http://localhost:4000/orders/view", {
+            customerID: this.state.userData.id
+          })
+          .then(res => {
+            this.setState({
+              products: res.data
+            });
+            alert("Rated Succesfully");
           })
           .catch(err => {
             console.log(err);
@@ -330,7 +395,7 @@ class CustomerView extends Component {
                           className={classes.root}
                           noValidate
                           autoComplete="off"
-                          onChange={e => this.handleQuantity(e, row.productID)}
+                          onChange={e => this.handleQuantity(e, row._id)}
                         >
                           <TextField id="standard-basic" label="New Quantity" />
                         </form>
@@ -362,37 +427,48 @@ class CustomerView extends Component {
                     )}
                     {row.status === "DISPATCHED" ? (
                       <StyledTableCell align="center">
-                        <FormControl className={classes.formControl}>
-                          <InputLabel id="demo-simple-select-helper-label">
-                            Rating
-                          </InputLabel>
-                          <Select
-                            labelId="demo-simple-select-helper-label"
-                            id="demo-simple-select-helper"
-                          >
-                            <MenuItem value={1}>1</MenuItem>
-                            <MenuItem value={2}>2</MenuItem>
-                            <MenuItem value={3}>3</MenuItem>
-                            <MenuItem value={4}>4</MenuItem>
-                            <MenuItem value={5}>5</MenuItem>
-                          </Select>
-                          <FormHelperText>
-                            <b>Select from 1 to 5</b>
-                          </FormHelperText>
-                        </FormControl>
+                        {!row.isRated ? (
+                          <FormControl className={classes.formControl}>
+                            <InputLabel id="demo-simple-select-helper-label">
+                              Rating
+                            </InputLabel>
+                            <Select
+                              labelId="demo-simple-select-helper-label"
+                              id="demo-simple-select-helper"
+                              onChange={e => this.onChangeRating(e, row._id)}
+                              value={this.state["rating" + row._id] || 0}
+                            >
+                              <MenuItem value={1}>1</MenuItem>
+                              <MenuItem value={2}>2</MenuItem>
+                              <MenuItem value={3}>3</MenuItem>
+                              <MenuItem value={4}>4</MenuItem>
+                              <MenuItem value={5}>5</MenuItem>
+                            </Select>
+                            <FormHelperText>Select from 1 to 5</FormHelperText>
+                          </FormControl>
+                        ) : (
+                          <p>
+                            You Rated <b>{row.rating}</b>
+                          </p>
+                        )}
                       </StyledTableCell>
                     ) : (
                       <StyledTableCell align="center"></StyledTableCell>
                     )}
                     {row.status === "DISPATCHED" ? (
                       <StyledTableCell align="center">
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          name="isCancelled"
-                        >
-                          Rate
-                        </Button>
+                        {!row.isRated ? (
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            name="isCancelled"
+                            onClick={e => this.rate(e, row._id, row.productID)}
+                          >
+                            Rate
+                          </Button>
+                        ) : (
+                          <p>You have rated the product!</p>
+                        )}
                       </StyledTableCell>
                     ) : (
                       <StyledTableCell align="center"></StyledTableCell>

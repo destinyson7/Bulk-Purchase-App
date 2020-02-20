@@ -3,6 +3,7 @@ require("dotenv").config();
 const router = require("express").Router();
 let Order = require("./../models/order");
 let Product = require("../models/product");
+let User = require("../models/user");
 const { check, validationResult } = require("express-validator");
 
 // Getting all the users
@@ -129,6 +130,10 @@ router.post("/view", (req, res) => {
               temp.name = product[0].name;
               temp.quantity = order.quantity;
               temp.quantityRemaining = product[0].quantityRemaining;
+              temp.isReviewed = order.isReviewed;
+              temp.isRated = order.isRated;
+              temp.rating = order.productRating;
+              temp.review = order.productReview;
 
               if (product[0].isCancelled) {
                 temp.status = "CANCELLED";
@@ -149,7 +154,7 @@ router.post("/view", (req, res) => {
 
               toRet.push(temp);
               done++;
-              // console.log(i + 1, temp);
+              console.log("temp is", temp);
               // console.log(done, toRet);
 
               if (done === orders.length) {
@@ -249,6 +254,70 @@ router.post("/edit", (req, res) => {
           }
         );
       }
+    }
+  );
+});
+
+router.post("/rate", (req, res) => {
+  const orderID = req.body.orderID;
+  const productID = req.body.productID;
+  const ratingGiven = req.body.ratingGiven;
+
+  console.log("to rate", orderID, productID, ratingGiven);
+
+  Order.findByIdAndUpdate(
+    {
+      _id: orderID
+    },
+    {
+      isRated: true,
+      productRating: ratingGiven
+    },
+    (err, orders) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      Product.find(
+        { _id: productID },
+
+        (err, product) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          let vendorID = product[0].sellerID;
+
+          User.find({ _id: vendorID }, (err, user) => {
+            if (err) {
+              return res.status(500).json(err);
+            }
+
+            let rateCount = user[0].rateCount;
+            rateCount++;
+
+            let rating = user[0].rating;
+            rating += ratingGiven;
+
+            User.findByIdAndUpdate(
+              {
+                _id: vendorID
+              },
+              {
+                rating: rating,
+                rateCount: rateCount
+              },
+              (err, user) => {
+                if (err) {
+                  return res.status(500).json(err);
+                }
+
+                return res.status(200).json({ success: true });
+              }
+            );
+          });
+        }
+      );
     }
   );
 });
