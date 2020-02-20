@@ -179,6 +179,15 @@ class CustomerView extends Component {
     console.log(this.state);
   }
 
+  onChangeReview(event, id) {
+    const { value } = event.target;
+    const key = "review" + id;
+    this.setState({
+      [key]: value
+    });
+    console.log(this.state);
+  }
+
   edit(event, orderID, productID, oldQuantity, quantityRemaining) {
     console.log("ordering");
 
@@ -295,6 +304,52 @@ class CustomerView extends Component {
           });
       })
       .catch(err => {
+        console.log(err);
+      });
+  }
+
+  review(event, orderID, productID) {
+    event.preventDefault();
+    console.log("review");
+    const key = "review" + orderID;
+    console.log("entered2", orderID, productID);
+
+    const review = this.state[key];
+
+    console.log("entered", orderID, productID, review);
+
+    if (review == undefined || review === "") {
+      alert("Please enter a review.");
+      return;
+    }
+
+    console.log("just before review");
+
+    axios
+      .post("http://localhost:4000/orders/review", {
+        orderID: orderID,
+        productID: productID,
+        reviewGiven: review
+      })
+      .then(res => {
+        console.log("hope reached here");
+        axios
+          .post("http://localhost:4000/orders/view", {
+            customerID: this.state.userData.id
+          })
+          .then(res => {
+            console.log("check haha");
+            this.setState({
+              products: res.data
+            });
+            alert("Reviewed Succesfully");
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      })
+      .catch(err => {
+        console.log("did it reach here?");
         console.log(err);
       });
   }
@@ -447,8 +502,8 @@ class CustomerView extends Component {
                             <FormHelperText>Select from 1 to 5</FormHelperText>
                           </FormControl>
                         ) : (
-                          <p>
-                            You Rated <b>{row.rating}</b>
+                          <p style={{ color: "blue" }}>
+                            <b>{row.rating}</b>
                           </p>
                         )}
                       </StyledTableCell>
@@ -467,7 +522,7 @@ class CustomerView extends Component {
                             Rate
                           </Button>
                         ) : (
-                          <p>You have rated the product!</p>
+                          <p>Already rated!</p>
                         )}
                       </StyledTableCell>
                     ) : (
@@ -475,26 +530,40 @@ class CustomerView extends Component {
                     )}
                     {row.status === "DISPATCHED" ? (
                       <StyledTableCell align="center">
-                        <form
-                          className={classes.root}
-                          noValidate
-                          autoComplete="off"
-                        >
-                          <TextField id="standard-basic" label="Review" />
-                        </form>
+                        {!row.isReviewed ? (
+                          <form
+                            className={classes.root}
+                            noValidate
+                            autoComplete="off"
+                            onChange={e => this.onChangeReview(e, row._id)}
+                          >
+                            <TextField id="standard-basic" label="Review" />
+                          </form>
+                        ) : (
+                          <p>
+                            <b>{row.review}</b>
+                          </p>
+                        )}
                       </StyledTableCell>
                     ) : (
                       <StyledTableCell align="center"></StyledTableCell>
                     )}
                     {row.status === "DISPATCHED" ? (
                       <StyledTableCell align="center">
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          name="isCancelled"
-                        >
-                          Review
-                        </Button>
+                        {!row.isReviewed ? (
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            name="isCancelled"
+                            onClick={e =>
+                              this.review(e, row._id, row.productID)
+                            }
+                          >
+                            Review
+                          </Button>
+                        ) : (
+                          <p>Already reviewed!</p>
+                        )}
                       </StyledTableCell>
                     ) : (
                       <StyledTableCell align="center"></StyledTableCell>

@@ -322,4 +322,29 @@ router.post("/rate", (req, res) => {
   );
 });
 
+router.post("/review", (req, res) => {
+  const orderID = req.body.orderID;
+  const productID = req.body.productID;
+  const reviewGiven = req.body.reviewGiven;
+
+  console.log("to review", orderID, productID, reviewGiven);
+
+  Order.findByIdAndUpdate(
+    {
+      _id: orderID
+    },
+    {
+      isReviewed: true,
+      productReview: reviewGiven
+    },
+    (err, orders) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      return res.status(200).json({ success: true });
+    }
+  );
+});
+
 module.exports = router;
