@@ -296,6 +296,7 @@ router.post("/search", (req, res) => {
               temp.id = done + 1;
               temp.name = product.name;
               temp.vendorName = user[0].firstName + " " + user[0].lastName;
+              temp.vendorID = user[0]._id;
               temp.price = product.price;
               temp.quantity = product.quantity;
               temp.quantityRemaining = product.quantityRemaining;
@@ -327,6 +328,98 @@ router.post("/search", (req, res) => {
       res.status(200).send([]);
       console.log(err);
     });
+});
+
+router.post("/vendorReviews", (req, res) => {
+  let sellerID = req.body.vendorID;
+
+  console.log("sellerID", sellerID);
+
+  Product.find(
+    {
+      sellerID: sellerID,
+      hasDispatched: true
+    },
+    (err, products) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      toRet = [];
+      let done = 0;
+      if (products.length === 0) {
+        return res.status(200).send(toRet);
+      } else {
+        for (var i = 0; i < products.length; i++) {
+          let product = products[i];
+
+          let temp = {};
+
+          done = 0;
+
+          Order.find(
+            {
+              productID: product._id
+            },
+            (err, orders) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+
+              // let reviews = [];
+              let tot = 0;
+
+              if (orders.length === 0) {
+                // temp.reviews = reviews;
+
+                // toRet.push(temp);
+
+                done++;
+
+                if (done === products.length) {
+                  return res.status(200).send(toRet);
+                }
+              }
+
+              for (var j = 0; j < orders.length; j++) {
+                let order = orders[j];
+
+                if (order.isReviewed) {
+                  toRet.push(order.productReview);
+                }
+
+                tot++;
+
+                if (tot === orders.length) {
+                  // temp.reviews = reviews;
+
+                  console.log("reached here again 2", temp);
+                  // toRet.push(temp);
+
+                  done++;
+
+                  if (done === products.length) {
+                    return res.status(200).send(toRet);
+                  }
+                }
+              }
+
+              // toRet.push(temp);
+              // done++;
+              // console.log("temp is", temp);
+              // // console.log(done, toRet);
+              //
+              // if (done === orders.length) {
+              //   return res.status(200).send(toRet);
+              // }
+            }
+          );
+        }
+
+        // return res.status(200).send(toRet);
+      }
+    }
+  );
 });
 
 module.exports = router;

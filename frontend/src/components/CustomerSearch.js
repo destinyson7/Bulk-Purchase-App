@@ -141,6 +141,7 @@ class CustomerSearch extends Component {
     this.onSubmit = this.onSubmit.bind(this);
     this.handleQuantity = this.handleQuantity.bind(this);
     this.order = this.order.bind(this);
+    this.getReviews = this.getReviews.bind(this);
   }
 
   componentDidMount() {
@@ -251,6 +252,27 @@ class CustomerSearch extends Component {
       [id]: value
     });
     console.log(this.state);
+  }
+
+  getReviews(event, vendorID, vendorName) {
+    event.preventDefault();
+
+    console.log("getting reviews", vendorID);
+
+    axios
+      .post("http://localhost:4000/products/vendorReviews", {
+        vendorID: vendorID
+      })
+      .then(resp => {
+        console.log("data", resp.data);
+
+        alert(
+          "Reviews of Vendor " + vendorName + " are:\n" + resp.data.join("\n")
+        );
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }
 
   order(event, id, quantityRemaining) {
@@ -417,7 +439,14 @@ class CustomerSearch extends Component {
                       {row.id}
                     </StyledTableCell>
                     <StyledTableCell component="th" scope="row">
-                      {row.vendorName}
+                      <Button
+                        variant="contained"
+                        onClick={e =>
+                          this.getReviews(e, row.vendorID, row.vendorName)
+                        }
+                      >
+                        {row.vendorName}
+                      </Button>
                     </StyledTableCell>
                     <StyledTableCell component="th" scope="row">
                       {row.vendorRating}

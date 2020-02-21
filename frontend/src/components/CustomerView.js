@@ -128,7 +128,9 @@ class CustomerView extends Component {
     this.handleQuantity = this.handleQuantity.bind(this);
     this.edit = this.edit.bind(this);
     this.onChangeRating = this.onChangeRating.bind(this);
+    this.onChangeReview = this.onChangeReview.bind(this);
     this.rate = this.rate.bind(this);
+    this.review = this.review.bind(this);
   }
 
   componentDidMount() {

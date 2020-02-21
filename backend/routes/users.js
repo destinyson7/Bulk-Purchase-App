@@ -71,7 +71,11 @@ router.post("/login", (req, res) => {
   User.findOne({ email: email }, (err, user) => {
     console.log("found");
     if (err) {
-      res.json(err);
+      return res.json(err);
+    }
+
+    if (!user) {
+      return res.json({ data: "Invalid Credentials" });
     }
     console.log(user);
     console.log(type, user.type);
