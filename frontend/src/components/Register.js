@@ -196,21 +196,11 @@ class Register extends Component {
         <Container component="header" maxWidth="xl">
           <AppBar position="static">
             <Toolbar>
-              <IconButton
-                edge="start"
-                className={classes.menuButton}
-                color="inherit"
-                aria-label="menu"
-              >
-                <ArrowBackIos />
-              </IconButton>
               <Typography
                 variant="h6"
                 className={classes.title}
                 style={{ flex: 1 }}
-              >
-                Back
-              </Typography>
+              ></Typography>
               <Button
                 color="inherit"
                 className="float-right"
