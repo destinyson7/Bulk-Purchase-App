@@ -1,7 +1,8 @@
 require("dotenv").config();
 
 const router = require("express").Router();
-let Product = require("./../models/product");
+let Order = require("./../models/order");
+let Product = require("../models/product");
 let User = require("../models/user");
 // let User = require("../models/user");
 const { check, validationResult } = require("express-validator");
@@ -141,23 +142,127 @@ router.post("/dispatch", (req, res) => {
   );
 });
 
+// router.post("/dispatched", (req, res) => {
+//   let sellerID = req.body.sellerID;
+//
+//   console.log(sellerID);
+//
+//   Product.find({
+//     sellerID: sellerID,
+//     isCancelled: false,
+//     hasDispatched: true
+//   })
+//     .then(products => {
+//       res.status(200).json(products);
+//     })
+//     .catch(err => {
+//       res.status(500).json(err);
+//       console.log(err);
+//     });
+// });
+
 router.post("/dispatched", (req, res) => {
   let sellerID = req.body.sellerID;
 
   console.log(sellerID);
 
-  Product.find({
-    sellerID: sellerID,
-    isCancelled: false,
-    hasDispatched: true
-  })
-    .then(products => {
-      res.status(200).json(products);
-    })
-    .catch(err => {
-      res.status(500).json(err);
-      console.log(err);
-    });
+  Product.find(
+    {
+      sellerID: sellerID,
+      isCancelled: false,
+      hasDispatched: true
+    },
+    (err, products) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      toRet = [];
+      let done = 0;
+      if (products.length === 0) {
+        return res.status(200).send(toRet);
+      } else {
+        for (var i = 0; i < products.length; i++) {
+          let product = products[i];
+
+          let temp = {};
+          temp._id = product._id;
+          temp.name = product.name;
+          temp.price = product.price;
+          temp.quantity = product.quantity;
+
+          done = 0;
+
+          Order.find(
+            {
+              productID: product._id
+            },
+            (err, orders) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+
+              let ratings = [];
+              let reviews = [];
+              let tot = 0;
+
+              if (orders.length === 0) {
+                temp.ratings = ratings;
+                temp.reviews = reviews;
+
+                toRet.push(temp);
+
+                done++;
+
+                if (done === products.length) {
+                  return res.status(200).send(toRet);
+                }
+              }
+
+              for (var j = 0; j < orders.length; j++) {
+                let order = orders[j];
+
+                if (order.isRated) {
+                  ratings.push(order.productRating);
+                }
+
+                if (order.isReviewed) {
+                  reviews.push(order.productReview);
+                }
+
+                tot++;
+
+                if (tot === orders.length) {
+                  temp.ratings = ratings;
+                  temp.reviews = reviews;
+
+                  console.log("reached here again", temp);
+                  toRet.push(temp);
+
+                  done++;
+
+                  if (done === products.length) {
+                    return res.status(200).send(toRet);
+                  }
+                }
+              }
+
+              // toRet.push(temp);
+              // done++;
+              // console.log("temp is", temp);
+              // // console.log(done, toRet);
+              //
+              // if (done === orders.length) {
+              //   return res.status(200).send(toRet);
+              // }
+            }
+          );
+        }
+
+        // return res.status(200).send(toRet);
+      }
+    }
+  );
 });
 
 router.post("/search", (req, res) => {

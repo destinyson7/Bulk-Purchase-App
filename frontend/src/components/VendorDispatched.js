@@ -183,21 +183,6 @@ class VendorDispatched extends Component {
       }
     };
 
-    let rows = [];
-
-    for (var i = 0; i < this.state.products.length; i++) {
-      rows.push(
-        createData(
-          this.state.products[i]._id,
-          this.state.products[i].name,
-          this.state.products[i].price,
-          this.state.products[i].quantity
-        )
-      );
-    }
-
-    console.log(rows);
-
     return (
       <div>
         <AppBar
@@ -261,23 +246,53 @@ class VendorDispatched extends Component {
           <Table className={classes.table} aria-label="customized table">
             <TableHead>
               <TableRow>
-                <StyledTableCell>Product Name</StyledTableCell>
-                <StyledTableCell align="right">Price</StyledTableCell>
-                <StyledTableCell align="right">Quantity</StyledTableCell>
+                <StyledTableCell align="center">Product Name</StyledTableCell>
+                <StyledTableCell align="center">Price</StyledTableCell>
+                <StyledTableCell align="center">Quantity</StyledTableCell>
+                <StyledTableCell align="center">Ratings</StyledTableCell>
+                <StyledTableCell align="center">Reviews</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map(row => (
-                <StyledTableRow key={row.name}>
-                  <StyledTableCell component="th" scope="row">
-                    {row.name}
-                  </StyledTableCell>
-                  <StyledTableCell align="right">{row.price}</StyledTableCell>
-                  <StyledTableCell align="right">
-                    {row.quantity}
-                  </StyledTableCell>
-                </StyledTableRow>
-              ))}
+              {this.state.products && this.state.products.length ? (
+                this.state.products.map(row => (
+                  <StyledTableRow key={row._id}>
+                    <StyledTableCell align="center" component="th" scope="row">
+                      {row.name}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.price}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.quantity}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.ratings && row.ratings.length ? (
+                        row.ratings.map(rating => (
+                          <div>
+                            <p>{rating},</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p style={{ color: "red" }}>NOT YET RATED.</p>
+                      )}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.reviews && row.reviews.length ? (
+                        row.reviews.map(review => (
+                          <div>
+                            <p>{review},</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p style={{ color: "red" }}>NOT YET REVIEWED.</p>
+                      )}
+                    </StyledTableCell>
+                  </StyledTableRow>
+                ))
+              ) : (
+                <StyledTableRow></StyledTableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
