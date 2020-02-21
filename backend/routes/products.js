@@ -8,6 +8,8 @@ let User = require("../models/user");
 const { check, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
+const FuzzySearch = require("fuzzy-search");
+
 // Getting all the users
 router.route("/").get((req, res) => {
   Product.find(function(err, products) {

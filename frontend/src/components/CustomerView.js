@@ -131,6 +131,7 @@ class CustomerView extends Component {
     this.onChangeReview = this.onChangeReview.bind(this);
     this.rate = this.rate.bind(this);
     this.review = this.review.bind(this);
+    this.logout = this.logout.bind(this);
   }
 
   componentDidMount() {
@@ -149,6 +150,12 @@ class CustomerView extends Component {
           this.setState({
             userData: res.data
           });
+
+          if (res.data.type === "vendor") {
+            localStorage.removeItem("access-token");
+            this.props.history.push("/login");
+          }
+
           axios
             .post("http://localhost:4000/orders/view", {
               customerID: this.state.userData.id
@@ -188,6 +195,11 @@ class CustomerView extends Component {
       [key]: value
     });
     console.log(this.state);
+  }
+
+  logout() {
+    localStorage.removeItem("access-token");
+    window.location.reload();
   }
 
   edit(event, orderID, productID, oldQuantity, quantityRemaining) {
@@ -393,6 +405,7 @@ class CustomerView extends Component {
               color="primary"
               variant="outlined"
               className={classes.link}
+              onClick={this.logout}
             >
               Log Out
             </Button>

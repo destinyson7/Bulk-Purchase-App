@@ -92,6 +92,8 @@ class Customer extends Component {
     this.state = {
       userData: ""
     };
+
+    this.logout = this.logout.bind(this);
   }
 
   componentDidMount() {
@@ -106,11 +108,16 @@ class Customer extends Component {
         .get("http://localhost:4000/auth", {
           headers: { authorization: `Bearer: ${jwt}` }
         })
-        .then(res =>
+        .then(res => {
           this.setState({
             userData: res.data
-          })
-        )
+          });
+
+          if (res.data.type === "vendor") {
+            localStorage.removeItem("access-token");
+            this.props.history.push("/login");
+          }
+        })
         .catch(err => {
           console.log("now");
           // console.log(this.state.userData);
@@ -119,6 +126,11 @@ class Customer extends Component {
           this.props.history.push("/LogIn");
         });
     }
+  }
+
+  logout() {
+    localStorage.removeItem("access-token");
+    window.location.reload();
   }
 
   render() {
@@ -162,6 +174,7 @@ class Customer extends Component {
             color="primary"
             variant="outlined"
             className={classes.link}
+            onClick={this.logout}
           >
             Log Out
           </Button>

@@ -99,6 +99,7 @@ class VendorAdd extends Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.logout = this.logout.bind(this);
   }
 
   componentDidMount() {
@@ -121,6 +122,12 @@ class VendorAdd extends Component {
           this.setState({
             userData: res.data
           });
+
+          if (res.data.type === "customer") {
+            localStorage.removeItem("access-token");
+            this.props.history.push("/login");
+          }
+
           console.log(this.state);
         })
         .catch(err => {
@@ -140,6 +147,11 @@ class VendorAdd extends Component {
       [name]: value
     });
     // console.log(this.state)
+  }
+
+  logout() {
+    localStorage.removeItem("access-token");
+    window.location.reload();
   }
 
   onSubmit(event) {
@@ -257,6 +269,7 @@ class VendorAdd extends Component {
               color="primary"
               variant="outlined"
               className={classes.link}
+              onClick={this.logout}
             >
               Log Out
             </Button>

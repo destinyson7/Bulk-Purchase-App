@@ -125,6 +125,9 @@ class VendorReady extends Component {
       userData: "",
       products: {}
     };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.logout = this.logout.bind(this);
   }
 
   componentDidMount() {
@@ -147,6 +150,12 @@ class VendorReady extends Component {
           this.setState({
             userData: res.data
           });
+
+          if (res.data.type === "customer") {
+            localStorage.removeItem("access-token");
+            this.props.history.push("/login");
+          }
+
           console.log("mine", this.state);
 
           axios
@@ -188,6 +197,11 @@ class VendorReady extends Component {
     this.setState({
       products: this.state.products.filter(product => product._id != id)
     });
+  }
+
+  logout() {
+    localStorage.removeItem("access-token");
+    window.location.reload();
   }
 
   render() {
@@ -265,6 +279,7 @@ class VendorReady extends Component {
               color="primary"
               variant="outlined"
               className={classes.link}
+              onClick={this.logout}
             >
               Log Out
             </Button>

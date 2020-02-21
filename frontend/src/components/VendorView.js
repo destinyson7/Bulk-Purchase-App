@@ -125,6 +125,9 @@ class VendorView extends Component {
       userData: "",
       products: {}
     };
+
+    this.logout = this.logout.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
@@ -147,6 +150,12 @@ class VendorView extends Component {
           this.setState({
             userData: res.data
           });
+
+          if (res.data.type === "customer") {
+            localStorage.removeItem("access-token");
+            this.props.history.push("/login");
+          }
+
           console.log("mine", this.state);
 
           axios
@@ -172,6 +181,11 @@ class VendorView extends Component {
         });
       console.log("final");
     }
+  }
+
+  logout() {
+    localStorage.removeItem("access-token");
+    window.location.reload();
   }
 
   handleChange(event, id) {
@@ -266,6 +280,7 @@ class VendorView extends Component {
               color="primary"
               variant="outlined"
               className={classes.link}
+              onClick={this.logout}
             >
               Log Out
             </Button>

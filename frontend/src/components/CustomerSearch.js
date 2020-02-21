@@ -142,6 +142,7 @@ class CustomerSearch extends Component {
     this.handleQuantity = this.handleQuantity.bind(this);
     this.order = this.order.bind(this);
     this.getReviews = this.getReviews.bind(this);
+    this.logout = this.logout.bind(this);
   }
 
   componentDidMount() {
@@ -160,6 +161,11 @@ class CustomerSearch extends Component {
           this.setState({
             userData: res.data
           });
+
+          if (res.data.type === "vendor") {
+            localStorage.removeItem("access-token");
+            this.props.history.push("/login");
+          }
 
           console.log("userData is", this.state.userData);
         })
@@ -224,6 +230,11 @@ class CustomerSearch extends Component {
         }
       }
     );
+  }
+
+  logout() {
+    localStorage.removeItem("access-token");
+    window.location.reload();
   }
 
   onSubmit(event) {
@@ -362,6 +373,7 @@ class CustomerSearch extends Component {
               color="primary"
               variant="outlined"
               className={classes.link}
+              onClick={this.logout}
             >
               Log Out
             </Button>

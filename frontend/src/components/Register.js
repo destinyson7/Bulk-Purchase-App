@@ -21,6 +21,7 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
+import { getJwt } from "./../helpers/jwt";
 import axios from "axios";
 
 function Copyright() {
@@ -77,6 +78,40 @@ class Register extends Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+  }
+
+  componentDidMount() {
+    // console.log("mount start");
+    const jwt = getJwt();
+
+    // console.log("jwt", jwt);
+
+    if (jwt) {
+      // console.log("else", jwt);
+      axios
+        .get("http://localhost:4000/auth", {
+          headers: { authorization: `Bearer: ${jwt}` }
+        })
+        .then(res => {
+          console.log("yo", this.state);
+
+          this.setState({
+            userData: res.data
+          });
+
+          if (res.data.type === "customer") {
+            this.props.history.push("/customer");
+          }
+          if (res.data.type === "vendor") {
+            this.props.history.push("/vendor");
+          }
+          console.log("mine", this.state);
+        })
+        .catch(err => {
+          console.log("haha", JSON.stringify(err));
+        });
+      console.log("final");
+    }
   }
 
   handleChange(event) {

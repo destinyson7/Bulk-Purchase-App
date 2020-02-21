@@ -147,6 +147,12 @@ class VendorDispatched extends Component {
           this.setState({
             userData: res.data
           });
+
+          if (res.data.type === "customer") {
+            localStorage.removeItem("access-token");
+            this.props.history.push("/login");
+          }
+
           console.log("mine", this.state);
 
           axios
