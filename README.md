@@ -21,7 +21,6 @@
 
 You need to install the following to make this work.
 
-- `python3`
 - `mongodb`
 - `express`
 - `react`

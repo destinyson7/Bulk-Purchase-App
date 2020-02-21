@@ -4,6 +4,7 @@ const router = require("express").Router();
 let User = require("./../models/user");
 const { check, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 // Getting all the users
 router.route("/").get((req, res) => {
@@ -25,9 +26,10 @@ router.post(
     check("lastName").isAlpha()
   ],
   (req, res) => {
+    let hashedPassword = bcrypt.hashSync(req.body.password, 10);
     let user = new User({
       email: req.body.email,
-      password: req.body.password,
+      password: hashedPassword,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       type: req.body.type
@@ -80,7 +82,11 @@ router.post("/login", (req, res) => {
     console.log(user);
     console.log(type, user.type);
     console.log(password, user.password);
-    if (user && user.password === password && user.type === type) {
+    if (
+      user &&
+      bcrypt.compareSync(password, user.password) &&
+      user.type === type
+    ) {
       const payload = {
         id: user.id,
         email: user.email,
