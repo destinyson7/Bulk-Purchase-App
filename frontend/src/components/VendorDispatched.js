@@ -125,6 +125,8 @@ class VendorDispatched extends Component {
       userData: "",
       products: {}
     };
+
+    this.logout = this.logout.bind(this);
   }
 
   componentDidMount() {
@@ -178,6 +180,11 @@ class VendorDispatched extends Component {
         });
       console.log("final");
     }
+  }
+
+  logout() {
+    localStorage.removeItem("access-token");
+    window.location.reload();
   }
 
   render() {
@@ -240,6 +247,7 @@ class VendorDispatched extends Component {
               color="primary"
               variant="outlined"
               className={classes.link}
+              onClick={this.logout}
             >
               Log Out
             </Button>
