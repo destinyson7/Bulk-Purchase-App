@@ -46,6 +46,17 @@ function App(props) {
         <Route exact path="/customer" component={Customer} />
         <Route exact path="/customer/search" component={CustomerSearch} />
         <Route exact path="/customer/view" component={CustomerView} />
+        <Route
+          component={() => (
+            <div style={{ marginTop: 150 }}>
+              <b>
+                <center>
+                  <h1>404 Not found</h1>
+                </center>
+              </b>{" "}
+            </div>
+          )}
+        />
       </Switch>
     </Router>
   );
