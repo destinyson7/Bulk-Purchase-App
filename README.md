@@ -48,8 +48,8 @@ nodemon server.js
 Run React:
 
 ```
-cd frontend
-npm install/
+cd frontend/
+npm install
 npm start
 ```
 
